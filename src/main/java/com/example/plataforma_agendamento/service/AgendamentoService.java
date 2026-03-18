@@ -2,6 +2,8 @@ package com.example.plataforma_agendamento.service;
 
 import com.example.plataforma_agendamento.Agendamento;
 import com.example.plataforma_agendamento.Usuario;
+import com.example.plataforma_agendamento.exception.AgendamentoDuplicado;
+import com.example.plataforma_agendamento.exception.UsuarioNaoEncontradoException;
 import com.example.plataforma_agendamento.repository.AgendamentoRepository;
 import com.example.plataforma_agendamento.repository.UserRepository;
 import jakarta.persistence.*;
@@ -28,12 +30,12 @@ public class AgendamentoService {
     public Agendamento criarAgendamento(Agendamento agendamento){
         //Buscar usuario
         Usuario usuario = userRepository.findById(agendamento.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuario nao encontrado"));
 
         //Verficar conflito
         Optional<Agendamento>agendaExistente = agendaRepository.findByUserIdAndDataHora(usuario.getId(), agendamento.getDataHora());
         if (agendaExistente.isPresent()){
-            throw new RuntimeException("Ja existe um agendamento neste horario");
+            throw new AgendamentoDuplicado("Ja existe um agendamento neste horario");
         }
         //associar usuario
         agendamento.setUser(usuario);
@@ -46,12 +48,12 @@ public class AgendamentoService {
     }
 
     public Agendamento buscarAgendaPorID(Long id){
-        return agendaRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        return agendaRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Agendamento nao encontrado em nosso banco"));
     }
 
     public void deletarAgendamento(Long id){
         if (!agendaRepository.existsById(id)){
-            throw new RuntimeException("Usuario nao encontrado");
+            throw new UsuarioNaoEncontradoException("Usuario nao encontrado");
         }
         agendaRepository.deleteById(id);
     }

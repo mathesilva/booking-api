@@ -33,22 +33,14 @@ public class AgendController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Agendamento>buscarAgendaPorID(@PathVariable Long id){
-        try{
             Agendamento agendamento = agendamentoService.buscarAgendaPorID(id);
             return ResponseEntity.ok(agendamento);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarAgendamento(@PathVariable Long id){
-        try{
             agendamentoService.deletarAgendamento(id);
             return ResponseEntity.noContent().build();
-        }catch (RuntimeException e){
-            return ResponseEntity.notFound().build();
-        }
     }
 
 

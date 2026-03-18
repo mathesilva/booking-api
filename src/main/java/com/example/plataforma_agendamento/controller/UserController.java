@@ -32,22 +32,14 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> buscarPorID(@PathVariable Long id) {
-        try {
             Usuario usuario = userService.buscarPorId(id);
             return ResponseEntity.ok(usuario);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarUsuario(@PathVariable Long id) {
-        try{
             userService.deletarUsuario(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
     }
 
 }
