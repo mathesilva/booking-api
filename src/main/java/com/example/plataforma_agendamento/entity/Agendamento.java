@@ -1,4 +1,4 @@
-package com.example.plataforma_agendamento;
+package com.example.plataforma_agendamento.entity;
 
 import jakarta.persistence.*;
 

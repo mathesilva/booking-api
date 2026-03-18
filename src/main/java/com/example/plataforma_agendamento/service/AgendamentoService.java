@@ -1,17 +1,14 @@
 package com.example.plataforma_agendamento.service;
 
-import com.example.plataforma_agendamento.Agendamento;
-import com.example.plataforma_agendamento.Usuario;
+import com.example.plataforma_agendamento.dto.AgendRequestDTO;
+import com.example.plataforma_agendamento.entity.Agendamento;
+import com.example.plataforma_agendamento.entity.Usuario;
 import com.example.plataforma_agendamento.exception.AgendamentoDuplicado;
 import com.example.plataforma_agendamento.exception.UsuarioNaoEncontradoException;
 import com.example.plataforma_agendamento.repository.AgendamentoRepository;
 import com.example.plataforma_agendamento.repository.UserRepository;
-import jakarta.persistence.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,19 +24,31 @@ public class AgendamentoService {
         this.userRepository = userRepository;
     }
 
-    public Agendamento criarAgendamento(Agendamento agendamento){
+    public Agendamento criarAgendamento(AgendRequestDTO dto){
         //Buscar usuario
-        Usuario usuario = userRepository.findById(agendamento.getUser().getId())
+        Usuario usuario = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuario nao encontrado"));
 
         //Verficar conflito
-        Optional<Agendamento>agendaExistente = agendaRepository.findByUserIdAndDataHora(usuario.getId(), agendamento.getDataHora());
+        Optional<Agendamento>agendaExistente = agendaRepository.findByUserIdAndDataHora(dto.getUserId(), dto.getDataHora());
         if (agendaExistente.isPresent()){
             throw new AgendamentoDuplicado("Ja existe um agendamento neste horario");
         }
         //associar usuario
+        Agendamento agendamento = new Agendamento();
+        agendamento.setDescricao(dto.getDescricao());
+        agendamento.setDataHora(dto.getDataHora());
         agendamento.setUser(usuario);
         //salvar usuario
+        return agendaRepository.save(agendamento);
+    }
+
+    public Agendamento atualizarAgendamento(Long id, AgendRequestDTO dto){
+        Agendamento agendamento = agendaRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Usuario nao encontrado"));
+        agendamento.setId(dto.getUserId());
+        agendamento.setDataHora(dto.getDataHora());
+        agendamento.setDescricao(dto.getDescricao());
+
         return agendaRepository.save(agendamento);
     }
 

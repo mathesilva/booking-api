@@ -1,9 +1,12 @@
 package com.example.plataforma_agendamento.service;
 
-import com.example.plataforma_agendamento.Usuario;
+import com.example.plataforma_agendamento.dto.UserRequestDTO;
+import com.example.plataforma_agendamento.dto.UserResponseDTO;
+import com.example.plataforma_agendamento.entity.Usuario;
 import com.example.plataforma_agendamento.exception.EmailJaCadastradoException;
 import com.example.plataforma_agendamento.exception.UsuarioNaoEncontradoException;
 import com.example.plataforma_agendamento.repository.UserRepository;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +23,28 @@ public class UsuarioService{
         this.userRepository = userRepository;
     }
 
-    public Usuario criarUsuario(Usuario usuario){
-        Optional<Usuario> usuarioExistente = userRepository.findByEmail(usuario.getEmail());
+    public Usuario criarUsuario(UserRequestDTO dto){
+        Optional<Usuario> usuarioExistente = userRepository.findByEmail(dto.getEmail());
         if (usuarioExistente.isPresent()){
             throw new EmailJaCadastradoException("Email ja existente!");
         }
+
+        Usuario usuario = new Usuario();
+        usuario.setName(dto.getName());
+        usuario.setEmail(dto.getEmail());
+        usuario.setSenha(dto.getSenha());
+
         return userRepository.save(usuario);
+    }
+
+    public Usuario atualizarUsuario(Long id, UserRequestDTO dto){
+        Usuario usuario = userRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Usuario nao cadastrado em nosso banco"));
+        usuario.setName(dto.getName());
+        usuario.setEmail(dto.getEmail());
+        usuario.setSenha(dto.getSenha());
+
+    return userRepository.save(usuario);
+
     }
 
     public List<Usuario> listar(){

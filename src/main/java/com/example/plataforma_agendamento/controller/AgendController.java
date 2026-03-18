@@ -1,12 +1,13 @@
 package com.example.plataforma_agendamento.controller;
 
-import com.example.plataforma_agendamento.Agendamento;
+import com.example.plataforma_agendamento.dto.AgendRequestDTO;
+import com.example.plataforma_agendamento.dto.AgendResponseDTO;
+import com.example.plataforma_agendamento.entity.Agendamento;
 import com.example.plataforma_agendamento.service.AgendamentoService;
-import com.example.plataforma_agendamento.service.UsuarioService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,8 +22,24 @@ public class AgendController {
     }
 
     @PostMapping
-    public Agendamento CriarAgendamento(@RequestBody Agendamento agendamento){
-        return agendamentoService.criarAgendamento(agendamento);
+    public ResponseEntity<AgendResponseDTO> CriarAgendamento(@RequestBody AgendRequestDTO dto){
+
+        Agendamento agendamento = agendamentoService.criarAgendamento(dto);
+        AgendResponseDTO responseDTO = new AgendResponseDTO();
+        responseDTO.setUserId(agendamento.getId());
+        responseDTO.setDataHora(agendamento.getDataHora());
+        responseDTO.setDescricao(agendamento.getDescricao());
+        responseDTO.setId(agendamento.getUser().getId());
+        responseDTO.setName(agendamento.getUser().getName());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<Agendamento> atualizarAgendamento(@PathVariable Long id, @RequestBody AgendRequestDTO dto){
+           Agendamento agendamento = agendamentoService.atualizarAgendamento(id, dto);
+           return ResponseEntity.ok(agendamento);
+
     }
 
     @GetMapping("/lista")

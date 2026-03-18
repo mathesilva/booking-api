@@ -1,14 +1,12 @@
 package com.example.plataforma_agendamento.repository;
 
-import com.example.plataforma_agendamento.Usuario;
+import com.example.plataforma_agendamento.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository <Usuario, Long > {
     Optional<Usuario> findByEmail(String email);
-
 }

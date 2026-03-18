@@ -1,122 +1,162 @@
-# API de Agendamentos
+#  Booking API
 
-API desenvolvida com Java + Spring Boot para gerenciamento de usuários e agendamentos, com validação de regras de negócio como conflito de horários.
+API REST desenvolvida com **Java + Spring Boot** para gerenciamento de usuários e agendamentos.
 
-## Funcionalidades
+---
 
-- Criar usuário
-- Listar usuários
-- Buscar usuário por ID
-- Deletar usuário
-- Criar agendamento
-- Validação de e-mail único
-- Validação de conflito de horário por usuário
+##  Funcionalidades
 
-## Regras de Negócio
+* Criar usuário
+* Listar usuários
+* Atualizar usuário
+* Deletar usuário
+* Criar agendamento
+* Atualizar agendamento
+* Validação de conflito de horário
+* Tratamento global de exceções
+* Uso de DTO (Data Transfer Object)
 
-- Não permite cadastrar dois usuários com o mesmo e-mail
-- Não permite criar dois agendamentos no mesmo horário para o mesmo usuário
-- Todo agendamento deve estar vinculado a um usuário existente
+---
 
 ## Tecnologias
 
-- Java 17+
-- Spring Boot
-- Spring Data JPA
-- Hibernate
-- Banco de dados (PostgreSQL)
-- Maven
+* Java
+* Spring Boot
+* Spring Data JPA
+* Hibernate
+* PostgreSQL / H2
+* Maven
 
-## Estrutura do Projeto
+---
 
-- Controller → entrada da API
-- Service → regras de negócio
-- Repository → acesso ao banco
-- Entity → modelo de dados
+##  Exemplo de Requisições
 
-## Como executar
+###  Criar usuário
 
-1. Clone o repositório
-2. Abra no IntelliJ ou IDE de preferência
-3. Execute a aplicação
-4. Utilize o Postman para testar os endpoints
+```json
+POST /usuarios
 
-## Endpoints principais
+{
+  "name": "Matheus",
+  "email": "matheus@email.com",
+  "senha": "123456"
+}
+```
 
-### Usuários
-- POST /usuarios
-- GET /usuarios
-- GET /usuarios/{id}
-- DELETE /usuarios/{id}
+---
 
-### Agendamentos
-- POST /agendamentos
-- GET /agendamentos/lista
-- GET /agendamentos/{id}
-- DELETE /agendamentos/{id}
+###  Criar agendamento
 
-## Autor
+```json
+POST /agendamentos
 
-Desenvolvido por Matheus Faias
+{
+  "dataHora": "2026-03-20T14:00:00",
+  "descricao": "Consulta",
+  "userId": 1
+}
+```
 
+---
 
+### ✏ Atualizar agendamento
 
-# 📅 Scheduling API
+```json
+PUT /agendamentos/1
 
-Backend API built with Java and Spring Boot for managing users and appointments, including business rules such as schedule conflict validation.
+{
+  "dataHora": "2026-03-25T15:30:00",
+  "descricao": "Consulta atualizada",
+  "userId": 1
+}
+```
 
-## 🚀 Features
+---
 
-- Create user
-- List users
-- Get user by ID
-- Delete user
-- Create appointment
-- Unique email validation
-- Appointment conflict validation per user
+##  Arquitetura
 
-## 🧠 Business Rules
+O projeto segue o padrão em camadas:
 
-- Users cannot share the same email
-- A user cannot have two appointments at the same time
-- Every appointment must be linked to an existing user
+* **Controller** → entrada da API
+* **Service** → regras de negócio
+* **Repository** → acesso ao banco
+* **Entity** → modelo do banco
+* **DTO** → comunicação da API
+* **Exception/Handler** → tratamento de erros
 
-## 🛠️ Technologies
+---
 
-- Java 17+
-- Spring Boot
-- Spring Data JPA
-- Hibernate
-- Database (PostgreSQL)
-- Maven
+##  English Version
 
-## 📌 Project Structure
+###  Booking API
 
-- Controller → API entry point
-- Service → business logic
-- Repository → database access
-- Entity → data model
+REST API built with **Java + Spring Boot** for managing users and appointments.
 
-## ▶️ How to run
+---
 
-1. Clone the repository
-2. Open in IntelliJ or your preferred IDE
-3. Run the application
-4. Use Postman to test endpoints
+###  Features
 
-## 📬 Main Endpoints
+* Create users
+* List users
+* Update users
+* Delete users
+* Create appointments
+* Update appointments
+* Schedule conflict validation
+* Global exception handling
+* DTO pattern usage
 
-### Users
-- POST /usuarios
-- GET /usuarios
-- GET /usuarios/{id}
-- DELETE /usuarios/{id}
+---
 
-### Appointments
-- POST /agendamentos
-- GET /agendamentos/lista
-- GET /agendamentos/{id}
-- DELETE /agendamentos/{id}
+###  Technologies
 
-## 💡 Author
-Developed by Matheus Faias
+* Java
+* Spring Boot
+* Spring Data JPA
+* Hibernate
+* PostgreSQL / H2
+* Maven
+
+---
+
+###  Request Examples
+
+#### Create User
+
+```json
+POST /usuarios
+
+{
+  "name": "Matheus",
+  "email": "matheus@email.com",
+  "senha": "123456"
+}
+```
+
+---
+
+#### Create Appointment
+
+```json
+POST /agendamentos
+
+{
+  "dataHora": "2026-03-20T14:00:00",
+  "descricao": "Consulta",
+  "userId": 1
+}
+```
+
+---
+
+#### Update Appointment
+
+```json
+PUT /agendamentos/1
+
+{
+  "dataHora": "2026-03-25T15:30:00",
+  "descricao": "Updated appointment",
+  "userId": 1
+}
+```

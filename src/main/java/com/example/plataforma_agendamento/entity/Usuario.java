@@ -1,4 +1,4 @@
-package com.example.plataforma_agendamento;
+package com.example.plataforma_agendamento.entity;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -43,5 +43,13 @@ public class Usuario{
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 }
