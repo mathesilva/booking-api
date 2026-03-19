@@ -43,17 +43,17 @@ public class UserController {
             return ResponseEntity.ok(usuario);
     }
 
-    @GetMapping("/listar")
-    public ResponseEntity<List<Usuario>> listar() {
-        List<Usuario> usuarios = userService.listar();
+    @GetMapping
+    public ResponseEntity<List<UserResponseDTO>> listar() {
+        List<UserResponseDTO> usuarios = userService.listar();
         return ResponseEntity.ok(usuarios);
 
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarPorID(@PathVariable Long id) {
-            Usuario usuario = userService.buscarPorId(id);
-            return ResponseEntity.ok(usuario);
+    public ResponseEntity<UserResponseDTO> buscarPorID(@PathVariable Long id) {
+            UserResponseDTO userDTO = userService.buscarPorId(id);
+            return ResponseEntity.ok(userDTO);
     }
 
     @DeleteMapping("/{id}")

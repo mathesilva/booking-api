@@ -8,10 +8,12 @@ import com.example.plataforma_agendamento.exception.UsuarioNaoEncontradoExceptio
 import com.example.plataforma_agendamento.repository.UserRepository;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService{
@@ -19,8 +21,12 @@ public class UsuarioService{
     @Autowired
     private final UserRepository userRepository;
 
-    public UsuarioService(UserRepository userRepository) {
+    @Autowired
+    private final PasswordEncoder passwordEncoder;
+
+    public UsuarioService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Usuario criarUsuario(UserRequestDTO dto){
@@ -32,7 +38,7 @@ public class UsuarioService{
         Usuario usuario = new Usuario();
         usuario.setName(dto.getName());
         usuario.setEmail(dto.getEmail());
-        usuario.setSenha(dto.getSenha());
+        usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
 
         return userRepository.save(usuario);
     }
@@ -41,19 +47,33 @@ public class UsuarioService{
         Usuario usuario = userRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Usuario nao cadastrado em nosso banco"));
         usuario.setName(dto.getName());
         usuario.setEmail(dto.getEmail());
-        usuario.setSenha(dto.getSenha());
+        usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
 
     return userRepository.save(usuario);
 
     }
 
-    public List<Usuario> listar(){
-        return userRepository.findAll();
+    public List<UserResponseDTO> listar(){
+        List<Usuario> usuarios =  userRepository.findAll();
+
+        return usuarios.stream().map(usuario -> {
+            UserResponseDTO dto = new UserResponseDTO();
+            dto.setId(usuario.getId());
+            dto.setEmail(usuario.getEmail());
+            dto.setName(usuario.getName());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
-    public Usuario buscarPorId(Long id){
-        return userRepository.findById(id)
+    public UserResponseDTO buscarPorId(Long id){
+        Usuario usuario = userRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuario nao encontrado"));
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.setId(usuario.getId());
+        dto.setEmail(usuario.getEmail());
+        dto.setName(usuario.getName());
+
+        return dto;
     }
 
     public void deletarUsuario(Long id){
