@@ -3,9 +3,10 @@ package com.example.plataforma_agendamento.controller;
 import com.example.plataforma_agendamento.dto.AgendRequestDTO;
 import com.example.plataforma_agendamento.dto.AgendResponseDTO;
 import com.example.plataforma_agendamento.entity.Agendamento;
+import com.example.plataforma_agendamento.entity.Usuario;
 import com.example.plataforma_agendamento.service.AgendamentoService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,17 +23,9 @@ public class AgendController {
     }
 
     @PostMapping
-    public ResponseEntity<AgendResponseDTO> CriarAgendamento(@RequestBody AgendRequestDTO dto){
-
-        Agendamento agendamento = agendamentoService.criarAgendamento(dto);
-        AgendResponseDTO responseDTO = new AgendResponseDTO();
-        responseDTO.setUserId(agendamento.getId());
-        responseDTO.setDataHora(agendamento.getDataHora());
-        responseDTO.setDescricao(agendamento.getDescricao());
-        responseDTO.setId(agendamento.getUser().getId());
-        responseDTO.setName(agendamento.getUser().getName());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+    public ResponseEntity<AgendResponseDTO> CriarAgendamento(@RequestBody AgendRequestDTO dto, @AuthenticationPrincipal Usuario usuarioLogado){
+        AgendResponseDTO response = agendamentoService.criarAgendamento(dto, usuarioLogado);
+        return ResponseEntity.status(201).body(response);
     }
 
     @PutMapping("{id}")
@@ -42,10 +35,10 @@ public class AgendController {
 
     }
 
-    @GetMapping("/lista")
-    public ResponseEntity<List<Agendamento>> listarAgendamentos(){
-        List<Agendamento> agendamentoList = agendamentoService.listaAgendamentos();
-        return ResponseEntity.ok(agendamentoList);
+    @GetMapping("/me")
+    public ResponseEntity<List<AgendResponseDTO>> listarMeusAgendamentos(@AuthenticationPrincipal Usuario usuarioLogado){
+        List<AgendResponseDTO> meusAgendamentos = agendamentoService.buscarMeusAgendamentos(usuarioLogado);
+        return ResponseEntity.ok(meusAgendamentos);
     }
 
     @GetMapping("/{id}")

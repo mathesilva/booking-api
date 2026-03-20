@@ -1,16 +1,22 @@
 package com.example.plataforma_agendamento.service;
 
 import com.example.plataforma_agendamento.dto.AgendRequestDTO;
+import com.example.plataforma_agendamento.dto.AgendResponseDTO;
+import com.example.plataforma_agendamento.dto.UserResponseDTO;
 import com.example.plataforma_agendamento.entity.Agendamento;
 import com.example.plataforma_agendamento.entity.Usuario;
 import com.example.plataforma_agendamento.exception.AgendamentoDuplicado;
 import com.example.plataforma_agendamento.exception.UsuarioNaoEncontradoException;
 import com.example.plataforma_agendamento.repository.AgendamentoRepository;
 import com.example.plataforma_agendamento.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AgendamentoService {
@@ -24,23 +30,28 @@ public class AgendamentoService {
         this.userRepository = userRepository;
     }
 
-    public Agendamento criarAgendamento(AgendRequestDTO dto){
-        //Buscar usuario
-        Usuario usuario = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuario nao encontrado"));
+    public AgendResponseDTO criarAgendamento(AgendRequestDTO dto, Usuario usuarioLogado){
 
-        //Verficar conflito
-        Optional<Agendamento>agendaExistente = agendaRepository.findByUserIdAndDataHora(dto.getUserId(), dto.getDataHora());
-        if (agendaExistente.isPresent()){
-            throw new AgendamentoDuplicado("Ja existe um agendamento neste horario");
+        if (dto.getDataHora().isBefore(LocalDateTime.now())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Nao é possivel realizar um agendamento no passado");
+        } if (agendaRepository.existsByDataHora(dto.getDataHora())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Este horário já está reservado.");
         }
-        //associar usuario
+
         Agendamento agendamento = new Agendamento();
         agendamento.setDescricao(dto.getDescricao());
         agendamento.setDataHora(dto.getDataHora());
-        agendamento.setUser(usuario);
-        //salvar usuario
-        return agendaRepository.save(agendamento);
+        agendamento.setUser(usuarioLogado);
+
+        Agendamento agendamentoSalvo = agendaRepository.save(agendamento);
+
+        AgendResponseDTO agendResponseDTO = new AgendResponseDTO();
+        agendResponseDTO.setId(agendamentoSalvo.getId());
+        agendResponseDTO.setDataHora(agendamentoSalvo.getDataHora());
+        agendResponseDTO.setDescricao(agendamentoSalvo.getDescricao());
+        agendResponseDTO.setName(agendamentoSalvo.getUser().getName());
+
+        return agendResponseDTO;
     }
 
     public Agendamento atualizarAgendamento(Long id, AgendRequestDTO dto){
@@ -52,8 +63,17 @@ public class AgendamentoService {
         return agendaRepository.save(agendamento);
     }
 
-    public List<Agendamento> listaAgendamentos(){
-        return agendaRepository.findAll();
+    public List<AgendResponseDTO> buscarMeusAgendamentos(Usuario usuarioLogado){
+        List<Agendamento> agendamentos = agendaRepository.findByUser(usuarioLogado);
+
+        return agendamentos.stream().map(agendamento -> {
+            AgendResponseDTO agendResponseDTO = new AgendResponseDTO();
+            agendResponseDTO.setId(agendamento.getId());
+            agendResponseDTO.setDescricao(agendamento.getDescricao());
+            agendResponseDTO.setDataHora(agendamento.getDataHora());
+            return agendResponseDTO;
+        }).collect(Collectors.toList());
+
     }
 
     public Agendamento buscarAgendaPorID(Long id){

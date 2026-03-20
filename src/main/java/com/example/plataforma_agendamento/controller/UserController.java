@@ -7,6 +7,7 @@ import com.example.plataforma_agendamento.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,6 +22,19 @@ public class UserController {
     public UserController(UsuarioService userService) {
         this.userService = userService;
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDTO> meuPerfil(@AuthenticationPrincipal  Usuario usuarioLogado){
+
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.setId(usuarioLogado.getId());
+        dto.setName(usuarioLogado.getName());
+        dto.setEmail(usuarioLogado.getEmail());
+
+        return ResponseEntity.ok(dto);
+    }
+
+
 
     @PostMapping
     public ResponseEntity<UserResponseDTO> criarUsuario(@RequestBody UserRequestDTO dto) {
