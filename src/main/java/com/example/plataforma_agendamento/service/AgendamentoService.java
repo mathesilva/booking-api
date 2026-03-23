@@ -2,21 +2,18 @@ package com.example.plataforma_agendamento.service;
 
 import com.example.plataforma_agendamento.dto.AgendRequestDTO;
 import com.example.plataforma_agendamento.dto.AgendResponseDTO;
-import com.example.plataforma_agendamento.dto.UserResponseDTO;
 import com.example.plataforma_agendamento.entity.Agendamento;
 import com.example.plataforma_agendamento.entity.Usuario;
-import com.example.plataforma_agendamento.exception.AgendamentoDuplicado;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.example.plataforma_agendamento.exception.UsuarioNaoEncontradoException;
 import com.example.plataforma_agendamento.repository.AgendamentoRepository;
 import com.example.plataforma_agendamento.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class AgendamentoService {
@@ -63,28 +60,44 @@ public class AgendamentoService {
         return agendaRepository.save(agendamento);
     }
 
-    public List<AgendResponseDTO> buscarMeusAgendamentos(Usuario usuarioLogado){
-        List<Agendamento> agendamentos = agendaRepository.findByUser(usuarioLogado);
+    private AgendResponseDTO converterDTO(Agendamento agendamento){
+        AgendResponseDTO dto = new AgendResponseDTO();
+        dto.setId(agendamento.getId());
+        dto.setDescricao(agendamento.getDescricao());
+        dto.setDataHora(agendamento.getDataHora());
 
-        return agendamentos.stream().map(agendamento -> {
-            AgendResponseDTO agendResponseDTO = new AgendResponseDTO();
-            agendResponseDTO.setId(agendamento.getId());
-            agendResponseDTO.setDescricao(agendamento.getDescricao());
-            agendResponseDTO.setDataHora(agendamento.getDataHora());
-            return agendResponseDTO;
-        }).collect(Collectors.toList());
 
+        return dto;
+    }
+
+    public Page<AgendResponseDTO> buscarMeusAgendamentos(Usuario usuarioLogado, Pageable pageable){
+        return agendaRepository.findByUser(usuarioLogado, pageable).map(this::converterDTO);
+    }
+
+    public Page<AgendResponseDTO> buscarTodos(Pageable pageable){
+        Page<Agendamento> agendamentos = agendaRepository.findAll(pageable);
+        return agendamentos.map(agendamento -> {
+            AgendResponseDTO dto = new AgendResponseDTO();
+            dto.setId(agendamento.getId());
+            dto.setDescricao(agendamento.getDescricao());
+            dto.setDataHora(agendamento.getDataHora());
+            if (agendamento.getUser() != null) {
+                dto.setName(agendamento.getUser().getName());
+            }
+            return dto;
+        });
     }
 
     public Agendamento buscarAgendaPorID(Long id){
         return agendaRepository.findById(id).orElseThrow(() -> new UsuarioNaoEncontradoException("Agendamento nao encontrado em nosso banco"));
     }
 
-    public void deletarAgendamento(Long id){
-        if (!agendaRepository.existsById(id)){
-            throw new UsuarioNaoEncontradoException("Usuario nao encontrado");
+    public void deletarAgendamento(Long id, Usuario usuarioLogado){
+        Agendamento agendamento = agendaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Agendamento nao encontrado!"));
+        if (!agendamento.getUser().getId().equals(usuarioLogado.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para cancelar este agendamento.");
         }
-        agendaRepository.deleteById(id);
+        agendaRepository.delete(agendamento);
     }
 
 

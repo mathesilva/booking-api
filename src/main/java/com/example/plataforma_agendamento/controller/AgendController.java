@@ -5,6 +5,9 @@ import com.example.plataforma_agendamento.dto.AgendResponseDTO;
 import com.example.plataforma_agendamento.entity.Agendamento;
 import com.example.plataforma_agendamento.entity.Usuario;
 import com.example.plataforma_agendamento.service.AgendamentoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -36,9 +39,15 @@ public class AgendController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<AgendResponseDTO>> listarMeusAgendamentos(@AuthenticationPrincipal Usuario usuarioLogado){
-        List<AgendResponseDTO> meusAgendamentos = agendamentoService.buscarMeusAgendamentos(usuarioLogado);
-        return ResponseEntity.ok(meusAgendamentos);
+    public ResponseEntity<Page<AgendResponseDTO>> listarMeusAgendamentos(@AuthenticationPrincipal Usuario usuarioLogado, @PageableDefault(size = 10, sort = "dataHora") Pageable pageable){
+        Page<AgendResponseDTO> pagina = agendamentoService.buscarMeusAgendamentos(usuarioLogado, pageable);
+        return ResponseEntity.ok(pagina);
+    }
+
+    @GetMapping("/todos")
+    public ResponseEntity<Page<AgendResponseDTO>>listarTodosAgendamentos(@PageableDefault(size = 10, sort = "dataHora") Pageable pageable){
+        Page<AgendResponseDTO> pagina = agendamentoService.buscarTodos(pageable);
+        return ResponseEntity.ok(pagina);
     }
 
     @GetMapping("/{id}")
@@ -48,8 +57,8 @@ public class AgendController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarAgendamento(@PathVariable Long id){
-            agendamentoService.deletarAgendamento(id);
+    public ResponseEntity<Void> deletarAgendamento(@PathVariable Long id, @AuthenticationPrincipal Usuario usuarioLogado){
+            agendamentoService.deletarAgendamento(id, usuarioLogado);
             return ResponseEntity.noContent().build();
     }
 

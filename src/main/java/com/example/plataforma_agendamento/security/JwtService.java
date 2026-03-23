@@ -25,6 +25,7 @@ public class JwtService {
             return JWT.create()
                     .withIssuer("plataform-agendamento")
                     .withSubject(usuario.getEmail())
+                    .withClaim("role", usuario.getRole())
                     .withExpiresAt(gerarDataExpiracao())
                     .sign(algorithm);
         } catch (JWTCreationException exception){

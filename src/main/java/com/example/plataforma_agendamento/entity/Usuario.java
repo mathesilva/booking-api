@@ -18,11 +18,13 @@ public class Usuario implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String role = "ROLE_USER";
+
     @Column(nullable = false)
     private String name;
+
     @Column(unique = true, nullable = false)
     private String email;
-
     private String senha;
 
     public Long getId() {
@@ -57,6 +59,14 @@ public class Usuario implements UserDetails {
         this.senha = senha;
     }
 
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
