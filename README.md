@@ -97,15 +97,16 @@ PUT /agendamentos/1
   "userId": 1
 }
 ```
-### Listar com Paginação (Admin)
-```json
-GET/agendamento/todos
+### Deletar agendamento
 
-URL: http://localhost:8080/agendamentos/todos
+`DELETE /agendamentos/{id}`
 
-Destaque: O retorno incluirá o objeto content com os dados e metadados como totalElements e totalPages.
-```
+*Requer Token JWT no Header*
 
+* **Regras de Segurança:** 
+* **Admin:** Tem permissão para deletar qualquer agendamento do sistema.
+* **User:** Só tem permissão para deletar os agendamentos vinculados ao seu próprio ID.
+* **Resposta de Sucesso:** `204 No Content`
 ---
 
 ##  Arquitetura
